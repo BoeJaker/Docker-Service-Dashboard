@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title>Connected Devices</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {background-color: #f2f2f2;}
+    </style>
+    <script>
+        var eventSource = new EventSource("/stream");
+        eventSource.onmessage = function(event) {
+            var devices = JSON.parse(event.data);
+            var table = document.getElementById("devices-table");
+            table.innerHTML = "";
+
+            for (var i = 0; i < devices.length; i++) {
+                var device = devices[i];
+
+                var row = table.insertRow(i);
+                var ipCell = row.insertCell(0);
+                var macCell = row.insertCell(1);
+                var hostnameCell = row.insertCell(2);
+                var nameCell = row.insertCell(3);
+                var assignCell = row.insertCell(4);
+
+                ipCell.innerHTML = device['ip'];
+                macCell.innerHTML = device['mac'];
+                hostnameCell.innerHTML = device['hostname'];
+                nameCell.innerHTML = device['name'];
+
+                var assignForm = document.createElement("form");
+                assignForm.method = "post";
+                assignForm.action = "/nmap/{{ range }}";
+
+                var macInput = document.createElement("input");
+                macInput.type = "text";
+                macInput.name = "mac";
+                macInput.value = device['mac'];
+
+                var nameInput = document.createElement("input");
+                nameInput.type = "text";
+                nameInput.name = "name";
+                nameInput.value = device['name'];
+
+                var assignButton = document.createElement("input");
+                assignButton.type = "submit";
+                assignButton.value = "Assign";
+
+                assignForm.appendChild(macInput);
+                assignForm.appendChild(nameInput);
+                assignForm.appendChild(assignButton);
+
+                assignCell.appendChild(assignForm);
+            }
+        };
+    </script>
+</head>
+<body>
+    <h1>Connected Devices:</h1>
+    <table id="devices-table">
+        <tr>
+            <th>IP Address</th>
+            <th>MAC Address</th>
+            <th>Hostname</th>
+            <th>Name</th>
+            <th>Assign Device Name</th>
+        </tr>
+    </table>
+</body>
+</html>

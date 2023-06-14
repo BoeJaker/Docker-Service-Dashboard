@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Container Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        body{
+            width: 100%;
+            height: 100%;
+        }
+        table {
+            width: 100%;
+            height: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+        }
+
+        table th,
+        table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        table tbody + tbody {
+            border-top: 2px solid #dee2e6;
+        }
+
+        .pre-scrollable {
+            max-height: 300px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <h1>Container Details</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Key</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <form action="/container/{{ details.id }}/start" method="POST" style="display: inline;">
+            <button type="submit">Start</button>
+        </form>
+        <form action="/container/{{ details.id }}/stop" method="POST" style="display: inline;">
+            <button type="submit">Stop</button>
+        </form>
+        <form action="/container/{{ details.id }}/remove" method="POST" style="display: inline;">
+            <button type="submit">Remove</button>
+        </form>
+        <form action="/container/{{ details.id }}/save" method="POST" style="display: inline;">
+            <button type="submit">Save</button>
+        </form>
+        <tbody>
+            
+            {% for key, value in details.items() %}
+                {% if key == 'Logs' %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td><pre class="pre-scrollable">{{ value }}</pre></td>
+                    </tr>
+                {% elif key == 'Ports' or key == 'Volumes' %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>
+                            <ul>
+                                {% for item in value %}
+                                    <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>{{ value }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/" class="btn btn-primary">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu {
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #f8f9fa;
+        padding: 20px;
+        transition: left 0.3s ease-in-out;
+        overflow-y: scroll;
+    }
+
+    .content {
+        margin-left: 250px;
+        padding: 20px;
+        height: 100%;
+    }
+
+    .collapse-menu {
+        left: -250px !important;
+    }
+
+    .pre-scrollable {
+        max-height: 200px;
+        overflow-y: scroll;
+    }
+
+    .scrollable-menu {
+        max-height: calc(100% - 160px); /* Adjust the height as needed */
+        overflow-y: auto;
+    }
+</style>

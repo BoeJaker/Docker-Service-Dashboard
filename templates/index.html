@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Container Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <style>
+        html{
+            height: 100%;
+        }
+        body{
+            height: 100%
+        }
+        .menu {
+            width: 350px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            background-color: #f8f9fa;
+            padding: 20px;
+            transition: left 0.3s ease-in-out;
+            overflow-y: scroll;
+        }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            height: 100%;
+        }
+
+        .collapse-menu {
+            left: -350px !important;
+        }
+
+        .pre-scrollable {
+            max-height: 200px;
+            overflow-y: scroll;
+        }
+        li{
+            padding: 5px;
+            list-style: none;
+        }
+        ul{
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu" id="menu">
+        <h3>Menu</h3>
+        <hr>
+        <h5>Containers</h5>
+        <div class="scrollable-menu">
+            <ul>
+                {% for container in containers %}
+                    <li>
+                        <a href="/container/{{ container.id }}" target="content">
+                            {{ container.name }}</br>{{ container.status }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        <h5>Host Ports</h5>
+        <div class="scrollable-menu">
+            <ul>
+                {% for port in host_ports %}
+                    {% for key, value in port.items() %}
+                        {% set port_num = value[0].HostPort | replace('/tcp', '') %}
+                        {% if value %}
+                            <li>
+                                <a href="/proxy/{{ port_num }}" target="content">
+                                    Port {{ port_num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        <h5>Bookmarks</h5>
+        <form action="/add_bookmark" method="POST">
+            <input type="text" name="url" placeholder="Enter URL">
+            <button type="submit">Add Bookmark</button>
+        </form>
+        <ul>
+            {% for bookmark in bookmarks %}
+                <li>
+                    <a href="{{ bookmark }}" target="content">
+                        {{ bookmark }}
+                    </a>
+                    <form action="/remove_bookmark" method="POST" style="display: inline;">
+                        <input type="hidden" name="url" value="{{ bookmark }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="content">
+        <button class="btn btn-primary" id="collapseButton" onclick="toggleMenu()">Toggle Menu</button>
+        <iframe name="content" width="100%" height="100%"></iframe>
+    </div>
+    <script>
+        function toggleMenu() {
+            var menu = document.getElementById("menu");
+            var content = document.getElementsByClassName("content")[0];
+            var collapseButton = document.getElementById("collapseButton");
+            
+            menu.classList.toggle("collapse-menu");
+            content.classList.toggle("collapse-menu");
+            
+            if (menu.classList.contains("collapse-menu")) {
+                collapseButton.innerHTML = "Expand Menu";
+            } else {
+                collapseButton.innerHTML = "Collapse Menu";
+            }
+        }
+    </script>
+</body>
+</html>
