@@ -5,89 +5,88 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
     <style>
-        html{
+        html {
             height: 100%;
         }
-        body{
+        
+        body {
             height: 100%
         }
-        .menu {
-            width: 350px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            background-color: #f8f9fa;
-            padding: 20px;
-            transition: left 0.3s ease-in-out;
-            overflow-y: scroll;
-        }
-
+        
         .content {
-            margin-left: 250px;
-            padding: 20px;
+            display: flex;
             height: 100%;
         }
-
-        .collapse-menu {
-            left: -350px !important;
+        
+        .menu {
+            width: 350px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            overflow-y: scroll;
         }
-
+        
+        .collapse-menu {
+            display: none;
+        }
+        
         .pre-scrollable {
             max-height: 200px;
             overflow-y: scroll;
         }
-        li{
+        
+        li {
             padding: 5px;
             list-style: none;
         }
-        ul{
+        
+        ul {
             padding: 0;
         }
     </style>
 </head>
 <body>
-    <div class="menu" id="menu">
-        <h3>Menu</h3>
-        <hr>
-        <h5>Containers</h5>
-        <div class="scrollable-menu">
-            <ul>
-                {% for container in containers %}
+    <div class="content">
+        <div class="menu" id="menu">
+            <h3>Menu</h3>
+            <hr>
+            <h5>Containers</h5>
+            <div class="scrollable-menu">
+                <ul>
+                    {% for container in containers %}
                     <li>
                         <a href="/container/{{ container.id }}" target="content">
                             {{ container.name }}</br>{{ container.status }}
                         </a>
                     </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <hr>
-        <h5>Host Ports</h5>
-        <div class="scrollable-menu">
-            <ul>
-                {% for port in host_ports %}
-                    {% for key, value in port.items() %}
-                        {% set port_num = value[0].HostPort | replace('/tcp', '') %}
-                        {% if value %}
-                            <li>
-                                <a href="/proxy/{{ port_num }}" target="content">
-                                    Port {{ port_num }}
-                                </a>
-                            </li>
-                        {% endif %}
                     {% endfor %}
-                {% endfor %}
-            </ul>
-        </div>
-        <hr>
-        <h5>Bookmarks</h5>
-        <form action="/add_bookmark" method="POST">
-            <input type="text" name="url" placeholder="Enter URL">
-            <button type="submit">Add Bookmark</button>
-        </form>
-        <ul>
-            {% for bookmark in bookmarks %}
+                </ul>
+            </div>
+            <hr>
+            <h5>Host Ports</h5>
+            <div class="scrollable-menu">
+                <ul>
+                    {% for port in host_ports %}
+                    {% for key, value in port.items() %}
+                    {% set port_num = value[0].HostPort | replace('/tcp', '') %}
+                    {% if value %}
+                    <li>
+                        <a href="http://192.168.3.135:{{ port_num }}" target="content">
+                            Port {{ port_num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <hr>
+            <h5>Bookmarks</h5>
+            <form action="/add_bookmark" method="POST">
+                <input type="text" name="url" placeholder="Enter URL">
+                <button type="submit">Add Bookmark</button>
+            </form>
+            <ul>
+                {% for bookmark in bookmarks %}
                 <li>
                     <a href="{{ bookmark }}" target="content">
                         {{ bookmark }}
@@ -97,22 +96,21 @@
                         <button type="submit">Remove</button>
                     </form>
                 </li>
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="content">
-        <button class="btn btn-primary" id="collapseButton" onclick="toggleMenu()">Toggle Menu</button>
-        <iframe name="content" width="100%" height="100%"></iframe>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="flex-grow-1">
+            <button class="btn btn-primary" id="collapseButton" onclick="toggleMenu()">Toggle Menu</button>
+            <iframe name="content" width="100%" height="100%"></iframe>
+        </div>
     </div>
     <script>
         function toggleMenu() {
             var menu = document.getElementById("menu");
-            var content = document.getElementsByClassName("content")[0];
             var collapseButton = document.getElementById("collapseButton");
-            
+
             menu.classList.toggle("collapse-menu");
-            content.classList.toggle("collapse-menu");
-            
+
             if (menu.classList.contains("collapse-menu")) {
                 collapseButton.innerHTML = "Expand Menu";
             } else {

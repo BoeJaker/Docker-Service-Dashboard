@@ -1,12 +1,11 @@
+import requests, json, time, nmap
 from flask import Flask, render_template, request, redirect, url_for, Response, make_response
-import docker
-import docker
-import requests
-import nmap
-import json
-
+# from simple_term_menu import TerminalMenu
 from threading import Thread
-import time
+
+# File Imports
+from cli import *
+from docker_operations import *
 
 app = Flask(__name__)
 client = docker.from_env()
@@ -17,23 +16,6 @@ device_names = {}
 # Get host IP address dynamically
 def get_host_ip():
     return request.host.split(':')[0]
-
-# Container Details
-def get_container_details(container):
-    details = {
-        'ID': container.id,
-        'Name': container.name,
-        'Stack Name': container.labels.get('com.docker.compose.project'),
-        'Status': container.status,
-        'Uptime': container.attrs['State']['StartedAt'],
-        'CPU Usage': container.stats(stream=False)['cpu_stats']['cpu_usage']['total_usage'],
-        'Memory Usage': container.stats(stream=False)['memory_stats']['usage'],
-        'Ports': container.attrs['NetworkSettings']['Ports'],
-        'Logs': container.logs().decode('utf-8'),
-        'Volumes': container.attrs['Mounts'],
-        'Configuration': container.attrs['Config'],
-    }
-    return details
 
 # Home page
 @app.route('/')
@@ -192,9 +174,26 @@ def stream():
 
     return Response(event_stream(), mimetype="text/event-stream")
 
+
+
+
+menu_entry_index = 0
+file_list = []
+exit = False
+
+
+def list_files(directory="/home/boejaker"):
+    print("loading...")
+    for root, subdirectories, files in os.walk(directory):
+        for file in files:
+            file_list.append(os.path.join(root, file))
+            
+
 if __name__ == '__main__':
     # Start the background scanning thread
-    scan_thread = Thread(target=scan_network, args=('192.168.3.0',))
-    scan_thread.daemon = True
-    scan_thread.start()
-    app.run(host="0.0.0.0", port="5005")
+    # scan_thread = Thread(target=scan_network, args=('192.168.3.0',))
+    # scan_thread.daemon = True
+    # scan_thread.start()
+    web_thread = Thread(target=app.run, kwargs={"threaded":True, "host":"0.0.0.0", "port":"5005"})
+    web_thread.start()
+    cli_menu()
