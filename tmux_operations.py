@@ -1,4 +1,15 @@
 import os
+import libtmux
+
+def tmux_generator(operations=[], branch=False):
+
+    for index, operation in enumerate(operations):
+        panes = window.panes
+        print(panes)
+        panes[index].send_keys(operation, enter=True)
+        if index < len(operations)-1:
+            window.split_window(vertical=False)
+    session.attach_session()
 
 def tmux_four_pane(operations=[]):
     # Split the terminal into four panes

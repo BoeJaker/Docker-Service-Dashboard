@@ -1,4 +1,27 @@
 import docker
+import subprocess
+import yaml
+import os
+
+client = docker.from_env()
+
+def get_docker_compose_services():
+    # Get the list of services from the Docker Compose file
+    docker_compose_file = os.path.join(os.getcwd(), "docker-compose.yml")
+    services = []
+    with open(docker_compose_file, "r") as f:
+        data = yaml.safe_load(f)
+        if "services" in data:
+            services = list(data["services"].keys())
+    return services
+
+def get_container_list():
+    containers = client.containers.list(all=True)
+    return containers
+
+def get_container(container_id):
+    container = client.containers.get(container_id)
+    return container
 
 # Container Details
 def get_container_details(container):
@@ -23,3 +46,22 @@ def get_container_details(container):
         'Configuration': container.attrs['Config'],
     }
     return details
+
+def run_service(service, attached=True):
+    # Run the Docker Compose service
+    if attached:
+        command = f"docker-compose up {service}"
+    else:
+        command = f"docker-compose up -d {service}"
+    subprocess.run(command, shell=True)
+
+def stop_service(service):
+    # Stop the Docker Compose service
+    command = f"docker-compose stop {service}"
+    subprocess.run(command, shell=True)
+
+def attach_to_service(service):
+    # Attach to the running Docker Compose service using tmux
+    session_name = f"{service}-session"
+    command = f"docker-compose exec {service} bash"
+    return(command)

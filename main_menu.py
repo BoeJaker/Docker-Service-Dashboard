@@ -7,6 +7,7 @@ from simple_term_menu import TerminalMenu
 from tmux_operations import *
 from git_operations import *
 from file_operations import *
+from docker_menu import *
 
 # Globals
 menu_entry_index = 0
@@ -16,10 +17,9 @@ exit = False
 def file_routine():
     global exit
     exit = False
-    list_files(root_dir)
-    i = file_list
+    file_list = list_files(root_dir)
     while exit == False:
-        i = file_menu_handler(i)
+        file_list = file_menu_handler(file_list)
 
 def github_routine():
     global exit
@@ -114,24 +114,25 @@ def github_menu_handler(directory):
             "Exit"
         ],
         operations=[
-            git_pull,
-            git_add,
-            git_commit,
-            git_push,
-            do_nothing,
-            gist_create,
-            gist_update,
-            exit_menu
+            [git_pull,[]],
+            [git_add,[]],
+            [git_commit,[]],
+            [git_push,[]],
+            [do_nothing,[]],
+            [gist_create,[]],
+            [gist_update,[]],
+            [exit_menu,[]]
         ]
     )
 
 # Main Menu
-def cli_menu():
+def main_menu_loop():
     global exit
     while True:
         menu_opt = main_menu(
             options=[
-                "Files", 
+                "Files",
+                "Docker", 
                 "Github",
                 "Ports", 
                 "Backup", 
@@ -145,6 +146,7 @@ def cli_menu():
             ],
             operations=[
                 [file_routine,[]],
+                [docker_menu_loop,[]],
                 [github_routine,[]],
                 [ports_routine,[]],
                 [backup_routine,[]],
@@ -160,4 +162,4 @@ def cli_menu():
         print(menu_opt)
         
 if __name__ == "__main__":
-    cli_menu()
+    main_manu_loop()

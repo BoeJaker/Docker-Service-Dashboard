@@ -4,11 +4,11 @@ from flask import Flask, render_template, request, redirect, url_for, Response, 
 from threading import Thread
 
 # File Imports
-from cli import *
+from main_menu import *
 from docker_operations import *
+from docker_menu import *
 
 app = Flask(__name__)
-client = docker.from_env()
 
 DEVICE_NAMES_FILE = "device_names.json"
 device_names = {}
@@ -20,55 +20,47 @@ def get_host_ip():
 # Home page
 @app.route('/')
 def home():
-    containers = client.containers.list(all=True)
+    containers = get_container_list()
+    print(containers)
     host_ports = [container.attrs['HostConfig']['PortBindings'] for container in containers]
     print(host_ports)
     bookmarks = request.cookies.get('bookmarks', '').split(';')
     return render_template('index.html', containers=containers, host_ports=host_ports, bookmarks=bookmarks)
 
-# # Proxy endpoint to load URLs in iframe
-# @app.route('/proxy/<port>')
-# def proxy(port):
-#     host_ip = get_host_ip()
-#     url = f'http://{host_ip}:{port}'
-#     response = requests.get(url)
-#     return response.content, response.status_code, response.headers.items()
-
 # Reverse Proxy
 @app.route('/proxy/<port>')
 def proxy(port):
-    host_ip = "127.0.0.1"
+    host_ip = "192.168.3.135"
     url = f'http://{host_ip}:{port}'
     response = requests.get(url, allow_redirects=True)
     headers = response.headers.items()
     return Response(response.content, content_type=response.headers['content-type'], headers=headers)
 
-
 # Container details page
 @app.route('/container/<container_id>')
 def container_details(container_id):
-    container = client.containers.get(container_id)
+    container = get_container(container_id)
     details = get_container_details(container)
     return render_template('container_details.html', details=details)
 
 # Start container
 @app.route('/container/<container_id>/start', methods=['POST'])
 def start_container(container_id):
-    container = client.containers.get(container_id)
+    container = get_container(container_id)
     container.start()
     return redirect('/', 302)
 
 # Stop container
 @app.route('/container/<container_id>/stop', methods=['POST'])
 def stop_container(container_id):
-    container = client.containers.get(container_id)
+    container = get_container(container_id)
     container.stop()
     return redirect('/', 302)
 
 # Remove container
 @app.route('/container/<container_id>/remove', methods=['POST'])
 def remove_container(container_id):
-    container = client.containers.get(container_id)
+    container = get_container(container_id)
     container.remove()
     return redirect('/', 302)
 
@@ -83,7 +75,7 @@ def build_container():
 # Save container state
 @app.route('/container/<container_id>/save', methods=['POST'])
 def save_container_state(container_id):
-    container = client.containers.get(container_id)
+    container = get_container(container_id)
     container.commit()
     return redirect('/', 302)
 
@@ -190,10 +182,7 @@ def list_files(directory="/home/boejaker"):
             
 
 if __name__ == '__main__':
-    # Start the background scanning thread
-    # scan_thread = Thread(target=scan_network, args=('192.168.3.0',))
-    # scan_thread.daemon = True
-    # scan_thread.start()
     web_thread = Thread(target=app.run, kwargs={"threaded":True, "host":"0.0.0.0", "port":"5005"})
     web_thread.start()
-    cli_menu()
+    main_menu_loop()
+    docker_menu_loop()
